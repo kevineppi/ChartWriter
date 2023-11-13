@@ -24,6 +24,11 @@ namespace ChartWriter
         public const int cMaxNumOfMV = 300;
         public const double MaxMV = 100.0;
         public const double MinMV = 0.0;
+        public const double cBorderTop = 0.05;
+        public const double cBorderBottom = 0.15;
+        public const double cBorderLeft = 0.05;
+        public const double cBorderRight = 0.05;
+
         public List <double> MVList { get; set; }
 
         public MainWindow()
@@ -46,7 +51,6 @@ namespace ChartWriter
         private void btnStartStop_Click(object sender, RoutedEventArgs e)
         {
             SamplingTimer.IsEnabled = !SamplingTimer.IsEnabled;
-            canChart.Children.Clear();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -71,7 +75,7 @@ namespace ChartWriter
             PointCollection pc = new PointCollection();
             for (int index = 0; index < MVList.Count; index++)
             {
-                pc.Add(new Point(index * 3, 5* MVList[index]));
+                pc.Add(new Point(Index2PixX(index) , Index2Pix( MVList[index])));
 
             }
             Polyline plChart = new Polyline
@@ -82,6 +86,18 @@ namespace ChartWriter
             
             };
             canChart.Children.Add(plChart);
+        }
+
+        private double Index2PixX(double index)
+        {
+            double percent = index / cMaxNumOfMV ;
+            return percent * canChart.ActualWidth * (1.0 - cBorderLeft - cBorderRight) + canChart.ActualWidth*cBorderLeft;
+        }
+
+        private double Index2Pix(double mv)
+        {
+            double percent = (mv  - MinMV) / (MaxMV - MinMV) ;
+            return canChart.ActualHeight-(percent * canChart.ActualHeight * (1.0 - cBorderTop - cBorderBottom) + canChart.ActualHeight* cBorderBottom);
         }
     }
 }
