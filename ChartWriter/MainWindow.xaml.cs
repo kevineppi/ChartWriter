@@ -21,8 +21,9 @@ namespace ChartWriter
     {
         public DispatcherTimer SamplingTimer { get; set; }
         public Random MVGenerator { get; set; }
-        public const int MaxMV = 100;
-        public const int MinMV = 100;
+        public const int cMaxNumOfMV = 300;
+        public const double MaxMV = 100.0;
+        public const double MinMV = 0.0;
         public List <double> MVList { get; set; }
 
         public MainWindow()
@@ -45,21 +46,42 @@ namespace ChartWriter
         private void btnStartStop_Click(object sender, RoutedEventArgs e)
         {
             SamplingTimer.IsEnabled = !SamplingTimer.IsEnabled;
+            canChart.Children.Clear();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             MVGenerator = new Random();
             MVList = new List<double>();
-            SamplingTimer = new DispatcherTimer { IsEnabled= false,Interval = new TimeSpan(0,0,0,0,500)};
+            SamplingTimer = new DispatcherTimer { IsEnabled= false,Interval = new TimeSpan(0,0,0,0,50)};
             SamplingTimer.Tick += SamplingTimer_Tick;
             
         }
 
         private void SamplingTimer_Tick(object? sender, EventArgs e)
         {
+            canChart.Children.Clear();
             double newMV = MVGenerator.NextDouble()*(MaxMV - MinMV) + MinMV;
             MVList.Add(newMV);
+            while (MVList.Count > cMaxNumOfMV)
+            {
+                MVList.RemoveAt(0);
+            }
+
+            PointCollection pc = new PointCollection();
+            for (int index = 0; index < MVList.Count; index++)
+            {
+                pc.Add(new Point(index * 3, 5* MVList[index]));
+
+            }
+            Polyline plChart = new Polyline
+            {
+                Stroke = new SolidColorBrush(Colors.Yellow),
+                Points = pc         
+            
+            
+            };
+            canChart.Children.Add(plChart);
         }
     }
 }
